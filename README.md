@@ -2,7 +2,7 @@
 
 ## Download
 
-Download the latest compiled version from [GitHub Releases](https://github.com/ImudTrust/Plus-Injector).
+Download the latest compiled version from [GitHub Releases](https://github.com/ImudTrust/Plus-Injector/releases/latest).
 
 > Download the `.exe` that matches the target game's architecture: `x64` for 64-bit games or `x86` for 32-bit games.
 
