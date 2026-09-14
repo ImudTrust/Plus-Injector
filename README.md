@@ -1,67 +1,78 @@
 # PlusInjector
 
-PlusInjector is a Windows command-line utility for loading and unloading a managed assembly in a **Mono process you own or are explicitly authorized to test**. It invokes a named, zero-argument managed method after loading the assembly.
+## Download
 
-## Build
+Download the latest compiled version from [GitHub Releases](https://github.com/ImudTrust/Plus-Injector).
 
-Open `plusinjector.slnx` in Visual Studio and build either `Release | x64` or `Release | Win32`. Match the executable architecture to the target process whenever possible.
+> Download the `.exe` that matches the target game's architecture: `x64` for 64-bit games or `x86` for 32-bit games.
 
-The resulting executable is `x64\\Release\\pi.exe` for an x64 build.
+## Usage
 
-## Command line
-
-```text
+```console
 pi.exe inject|eject [options]
 ```
 
-Short and long flags are interchangeable; use one spelling per option.
+### Options
 
-| Option | Purpose |
-| --- | --- |
-| `-p`, `--process <name\|pid>` | Target process executable name or PID. |
-| `-a`, `--assembly <path\|address>` | Assembly DLL to load, or the printed address to unload. |
-| `-n`, `--namespace <name>` | Optional namespace of the loader class. |
+| Option | Description |
+|---|---|
+| `-p`, `--process <name\|pid>` | Target process name or PID. |
+| `-a`, `--assembly <path\|address>` | Assembly DLL path when injecting, or loaded assembly address when ejecting. |
+| `-n`, `--namespace <name>` | Loader namespace. |
 | `-c`, `--class <name>` | Loader class name. |
-| `-m`, `--method <name>` | Zero-argument method to run. |
-| `-d`, `--delay <time>` | Wait before running: `250ms`, `10s`, or `1m`. |
-| `-h`, `--hide` | Hide the console after startup. Useful only when the caller has already captured or redirected output. |
-| `-log`, `--log <path>` | Duplicate console output into a new log file. |
-| `-out`, `--result <path>` | On injection, save only the resulting assembly address to a file. |
-| `--help` | Show built-in help. |
+| `-m`, `--method <name>` | Method to execute after loading. |
+| `-d`, `--delay <time>` | Delay before execution, such as `250ms`, `10s`, or `1m`. |
+| `-h`, `--hide` | Hide the console window after startup. |
+| `-log`, `--log <path>` | Save console output to a log file. |
+| `-out`, `--result <path>` | Save the resulting assembly address to a file. |
+| `--help` | Display the built-in help message. |
 
-### Inject
+## Inject
 
-```powershell
-pi.exe inject --process ExampleGame.exe --assembly C:\\Mods\\Example.dll --namespace Example --class Loader --method Load --log C:\\Logs\\example-inject.log --result C:\\Logs\\example-address.txt
+```console
+pi.exe inject --process ExampleGame.exe --assembly C:\Mods\Example.dll --namespace Example --class Loader --method Load
 ```
 
-On success, the tool prints the remote assembly address. Save that address if it will later be needed for ejection.
+With logging and result output:
 
-### Eject
-
-```powershell
-pi.exe eject --process ExampleGame.exe --assembly 0x000001D23A98B000 --namespace Example --class Loader --method Unload --log C:\\Logs\\example-eject.log
+```console
+pi.exe inject --process ExampleGame.exe --assembly C:\Mods\Example.dll --namespace Example --class Loader --method Load --log C:\Logs\inject.log --result C:\Logs\address.txt
 ```
 
-## Calling from an authorized launcher or script
+## Eject
 
-Use the stable long options and check the process exit code instead of parsing human-readable error text. For an inject operation, `--result` writes the address alone (for example `0x000001D23A98B000`) after a successful load, so a caller can retain it for a later eject operation.
+```console
+pi.exe eject --process ExampleGame.exe --assembly 0x000001D23A98B000 --namespace Example --class Loader --method Unload
+```
+
+## From Another Program
+
+```console
+pi.exe inject --process ExampleGame.exe --assembly C:\Mods\Example.dll --namespace Example --class Loader --method Load
+```
+
+Check the process exit code:
 
 | Exit code | Meaning |
-| --- | --- |
+|---|---|
 | `0` | Operation completed successfully. |
-| `1` | The requested operation failed. |
-| `2` | Command-line usage or validation error. |
+| `1` | Operation failed. |
+| `2` | Invalid command-line arguments. |
 
-For no visible console output, have the calling program redirect standard output and standard error, and use `--log` when a local diagnostic record is needed. `--hide` hides the console window but does not suppress output or logging.
+Use `--result` to save the assembly address:
 
-## Requirements and limitations
+```text
+0x000001D23A98B000
+```
 
-- Windows and a process hosting the Mono runtime are required.
-- The loader method must take no arguments.
-- The target must be a process you control or have explicit permission to test.
-- Store the address printed by `inject`; it identifies the loaded assembly for `eject`.
+## Hide Console
 
-## Repository contents
+```console
+pi.exe inject --process ExampleGame.exe --assembly C:\Mods\Example.dll --namespace Example --class Loader --method Load --hide
+```
 
-The `.gitignore` excludes Visual Studio state and compiled/debug artifacts, so a GitHub upload contains project configuration and source rather than build output.
+## Help
+
+```console
+pi.exe --help
+```
